@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Microphone & Speaker</title>
+    <style>
+        body {
+          
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .title {
+            font-size: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .micbutton {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        #microphone {
+            position: relative;
+            background-color: #3498db;
+            color: white;
+            padding: 20px 40px;
+            border-radius: 50px;
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-size: 18px;
+            transition: background-color 0.3s, transform 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #microphone:hover {
+            background-color: #2ecc71;
+            transform: scale(1.05);
+        }
+
+        #microphone.active {
+            background-color: #e74c3c;
+        }
+
+        #microphone img {
+            height: 30px;
+        }
+
+        #speaker {
+            text-align: center;
+            margin-top: 20px;
+            background-color: #red; /* Ini bukan warna valid, Anda bisa menggunakan warna lain atau menghapusnya */
+            max-width: 100%;
+            height: 45vh;
+        }
+        
+        #speaker img {
+            max-width: 100%;
+            height: auto;
+        }
+        
+#refresh-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 5rem;
+            margin-bottom: 10px;
+        }
+
+        #refresh-button button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        #refresh-button button:hover {
+            background-color: #2ecc71;
+        }
+        #footer {
+            text-align: center;
+            background-color: #f1f1f1;
+            padding: 10px 0;
+            bottom: 0;
+        }
+        
+    </style>
+</head>
+<body>
+<div class="title">
+    <h1>Microphone & Speaker</h1>
+</div>
+<div class="micbutton">
+    <button id="microphone">
+        <img src="microphone.png" alt="Microphone">
+        Aktifkan Microphone
+    </button>
+</div>
+<div id="speaker">
+  <img src="speaker.png" alt="speaker.png">
+</div>
+
+<div id="refresh-button">
+    <button onclick="refreshPage()">Refresh</button>
+</div>
+
+<div id="footer">
+        &copy; 2023 dibuat oleh Secca.
+    </div>
+
+<script>
+    const microphoneButton = document.getElementById('microphone');
+    const speakerDiv = document.getElementById('speaker');
+    let audioContext;
+    let microphone;
+    let speaker;
+    let audioElement;
+    let isMicrophoneActive = false;
+
+    microphoneButton.addEventListener('click', () => {
+        if (!isMicrophoneActive) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then((stream) => {
+                    audioContext = new AudioContext();
+                    microphone = audioContext.createMediaStreamSource(stream);
+                    speaker = audioContext.createMediaStreamDestination();
+                    microphone.connect(speaker);
+                    isMicrophoneActive = true;
+
+                    const audioElement = document.createElement('audio');
+                    audioElement.srcObject = speaker.stream;
+                    audioElement.autoplay = true;
+                    speakerDiv.appendChild(audioElement);
+
+                    microphoneButton.classList.add('active');
+                    microphoneButton.textContent = 'Matikan Microphone';
+                    speakerDiv.classList.add('active');
+                })
+                .catch((error) => {
+                    console.error('Gagal mengaktifkan microphone:', error);
+                });
+        } 
+        else {
+            if (audioContext) {
+                audioContext.close().then(() => {
+                    isMicrophoneActive = false;
+                    microphoneButton.classList.remove('active');
+                    microphoneButton.textContent = 'Aktifkan Microphone';
+                    speakerDiv.classList.remove('active');
+                    if (audioElement) {
+                        audioElement.pause();
+                        audioElement.srcObject = null;
+                        audioElement.remove();
+                    }
+                });
+            }
+        }
+    });
+    function refreshPage() {
+        location.reload();
+    }
+</script>
+</body>
+</html>
